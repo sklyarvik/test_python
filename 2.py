@@ -1,5 +1,4 @@
-import math
-class Segment:
+class meaning:
     count = 1
 
     def __init__(self, position, value):
@@ -7,25 +6,34 @@ class Segment:
         self.range = value
         self.position = position
 
+def add_atm_distances(seg_lis: list[meaning]):
+    new_distance = []
 
-def build_optimal_ranges(seg_list: list[Segment], points: int):
-    seg_dict: dict[int, list[Segment]]
+    for i in seg_lis:
+        for j in range(0, i.count):
+            new_distance.append(i.value)
+
+    return  new_distance
+
+
+def optimal_distances(seg_list: list[meaning], bank: int):
+    seg_dict: dict[int, list[meaning]]
     seg_dict = {0: seg_list}
 
-    for iterator in range(1, points+1):
+    for iterator in range(1, bank+1):
         seg_dict[iterator] = (seg_dict[iterator-1])
 
-        max_value = 0
+        max= 0
         count_max_value = 1
         iter = 0
         index = 0
 
         for segment in seg_dict[iterator]:
-            if segment.value > max_value:
-                max_value = segment.value
+            if segment.value > max:
+                max = segment.value
                 count_max_value = segment.count
                 index = iter
-            elif (segment.value == max_value) and (segment.count > count_max_value):
+            elif (segment.value == max) and (segment.count > count_max_value):
                 index = iter
                 count_max_value = segment.count
 
@@ -34,37 +42,17 @@ def build_optimal_ranges(seg_list: list[Segment], points: int):
         seg_dict[iterator][index].count += 1
         seg_dict[iterator][index].value = seg_dict[iterator][index].range / seg_dict[iterator][index].count
 
-    return seg_dict[points]
-
-
-def get_result_list(seg_lis: list[Segment]):
-    result_list = []
-
-    for i in seg_lis:
-        for j in range(0, i.count):
-            result_list.append(i.value)
-
-    return result_list
-
-
+    return seg_dict[bank]
 
 if __name__ == '__main__':
-    while True:
         segment_list = []
-        n = int(input("Сколько банкоматов уже стоит: "))
-        k = int(input("Нужно поставить: "))
+        distances = [100, 20, 30, 80]
+        for i, distance in enumerate(distances):
+            segment_list.append(meaning(i, abs(distance)))
+            segment_list.sort(key=lambda x: x.value, reverse=True)
 
-        print()
-
-        for i in range(0, n-1):
-            segment_list.append(Segment(i, math.fabs(int(input("Расстояние["+str(i)+"] = ")))))
-
-        segment_list.sort(key=lambda x: x.value, reverse=True)
-
-        segment_list = build_optimal_ranges(segment_list, k)
-
+        n = 5
+        k = 2
+        segment_list = optimal_distances(segment_list, k)
         segment_list.sort(key=lambda x: x.position, reverse=False)
-
-        print()
-        print("Новые расстояния: " + str(get_result_list(segment_list)))
-        print()
+        print("Новые расстояния: " + str(add_atm_distances(segment_list)))
