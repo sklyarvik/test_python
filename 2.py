@@ -1,23 +1,70 @@
-def add_atms(n, k, distances):
-    # Проверка на коректность
-    if n <= 0 or k < 0 or len(distances) != n - 1:
-        return "Некорректные входные данные"
+import math
+class Segment:
+    count = 1
 
-    # Сортировка расстояния в порядке убывания
-    distances.sort(reverse=True)
+    def __init__(self, position, value):
+        self.value = value
+        self.range = value
+        self.position = position
 
-    # Добавляет k банкоматов делая меньше максимальное расстояние
-    for i in range(k):
-        max_distance = distances.pop(0)
-        new_distance = max_distance // 2
-        distances.extend([new_distance, max_distance - new_distance])
 
-    # Сортируем  по возрастанию
-    distances.sort()
+def build_optimal_ranges(seg_list: list[Segment], points: int):
+    seg_dict: dict[int, list[Segment]]
+    seg_dict = {0: seg_list}
 
-    return distances
-n = 5
-k = 3
-distances = [100, 30, 20, 80]
-result = add_atms(n, k, distances)
-print(result)
+    for iterator in range(1, points+1):
+        seg_dict[iterator] = (seg_dict[iterator-1])
+
+        max_value = 0
+        count_max_value = 1
+        iter = 0
+        index = 0
+
+        for segment in seg_dict[iterator]:
+            if segment.value > max_value:
+                max_value = segment.value
+                count_max_value = segment.count
+                index = iter
+            elif (segment.value == max_value) and (segment.count > count_max_value):
+                index = iter
+                count_max_value = segment.count
+
+            iter += 1
+
+        seg_dict[iterator][index].count += 1
+        seg_dict[iterator][index].value = seg_dict[iterator][index].range / seg_dict[iterator][index].count
+
+    return seg_dict[points]
+
+
+def get_result_list(seg_lis: list[Segment]):
+    result_list = []
+
+    for i in seg_lis:
+        for j in range(0, i.count):
+            result_list.append(i.value)
+
+    return result_list
+
+
+
+if __name__ == '__main__':
+    while True:
+        segment_list = []
+        n = int(input("Сколько банкоматов уже стоит: "))
+        k = int(input("Нужно поставить: "))
+
+        print()
+
+        for i in range(0, n-1):
+            segment_list.append(Segment(i, math.fabs(int(input("Расстояние["+str(i)+"] = ")))))
+
+        segment_list.sort(key=lambda x: x.value, reverse=True)
+
+        segment_list = build_optimal_ranges(segment_list, k)
+
+        segment_list.sort(key=lambda x: x.position, reverse=False)
+
+        print()
+        print("Новые расстояния: " + str(get_result_list(segment_list)))
+        print()
